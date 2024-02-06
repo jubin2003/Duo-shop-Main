@@ -4,7 +4,8 @@ import { Button, TextField, Typography, Grid } from '@mui/material';
 import ResponsiveAppBar from '../assets/ResponsiveAppBar';
 import Footer from '../assets/Footer';
 import { useParams, useNavigate } from 'react-router-dom';
-
+import { toast, ToastContainer } from 'react-toastify'; // Import toast and ToastContainer
+import 'react-toastify/dist/ReactToastify.css';
 const UpdateProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -20,9 +21,9 @@ const UpdateProduct = () => {
 
   useEffect(() => {
     // Fetch the details of the product using the ID from the server
-    axios.get(`http://localhost:5000/api/products/${id}`)
+    axios.get(`http://localhost:5000/api/fetchproduct/select/${id}`)
       .then((response) => {
-        setProduct(response.data);
+        setProduct(response.data.data); // Access the 'data' property of the response
       })
       .catch((error) => {
         console.error('Error fetching product details:', error);
@@ -35,20 +36,28 @@ const UpdateProduct = () => {
 
   const handleSubmit = () => {
     // Update the product details on the server
-    axios.put(`http://localhost:5000/api/products/${id}`, product)
+    axios.put(`http://localhost:5000/api/fetchproduct/${id}`, product)
       .then((response) => {
         console.log('Product updated successfully:', response.data);
-        // Redirect to the view page after successful update
-        navigate('/view-product');
+        toast.success('Product updated successfully');
+
+        // Redirect to the view page after a successful update
+        setTimeout(() => {
+          // Redirect to the view page after a successful update
+          navigate('/view-product');
+        }, 2000);
       })
       .catch((error) => {
         console.error('Error updating product:', error);
+        toast.error('Error updating product: Please try again');
+
       });
   };
 
   return (
     <div>
       <ResponsiveAppBar />
+      <ToastContainer/>
       <br />
       <div style={{ margin: '6%' }} className='App'>
         <Typography variant='h5' style={{ color: 'blue' }}>

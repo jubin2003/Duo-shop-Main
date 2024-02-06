@@ -45,54 +45,57 @@ const ViewProduct = () => {
 
   return (
     <div>
-      <ResponsiveAppBar />
-      <br />
-      <Grid container spacing={2}>
-        {products.map((product) => (
-          <Grid item key={product._id} xs={12} sm={6} md={4}>
-            <Card sx={{ maxWidth: 445 }}>
-              <CardMedia
-                component="img"
-                alt="Product Image"
-                height="240"
-                image={product.img}
-              />
-              <CardContent>
+    <ResponsiveAppBar />
+    <br />
+    <Grid container spacing={2}>
+      {products.map((product) => (
+        <Grid item key={product._id} xs={12} sm={6} md={4}>
+          <Card sx={{ maxWidth: 445, height: '100%' }}> {/* Set a fixed height for the Card */}
+            <CardMedia
+              component="img"
+              alt="Product Image"
+              height="240"
+              image={product.img}
+            />
+            <CardContent>
               <Typography gutterBottom variant="h5" component="div">
                 {product.title}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" noWrap>
                 {product.desc}
               </Typography>
-              <Typography variant="body" color="text.secondary">
+              <Typography variant="body" color="text.secondary" noWrap>
                 {product.categories.join(', ')}
               </Typography>
+              <br />
               <Typography variant="body" color="text.secondary">
                 {product.size}
               </Typography>
+              <br />
               <Typography variant="body" color="text.secondary">
                 {product.color}
+                <br />
               </Typography>
               <Typography gutterBottom variant="h5" color="text.secondary">
                 Rs.{product.price}
               </Typography>
             </CardContent>
-              <CardActions>
-                <Button onClick={() => handleUpdate(product._id)} size="small">
-                  Update
-                </Button>
-                <Button onClick={() => handleDelete(product._id)} size="small">
-                  Delete
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-      <br />
-      <Footer />
-      <ToastContainer />
-    </div>
+            <CardActions>
+              <Button onClick={() => handleUpdate(product._id)} size="small">
+                Update
+              </Button>
+              <Button onClick={() => handleDelete(product._id)} size="small">
+                Delete
+              </Button>
+            </CardActions>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+    <br />
+    <Footer />
+    <ToastContainer />
+  </div>
   );
 };
 
