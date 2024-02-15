@@ -42,7 +42,7 @@ const stripeRoute = require("./routes/stripe");
 const productfetchRoute = require("./routes/productfetch");
 const userfetchRoute = require("./routes/userfetch");
 const orderdata = require("./routes/orderdata");
-
+const cartproduct = require("./routes/cartproduct");
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/products", productRoute);
@@ -52,11 +52,10 @@ app.use("/api/checkout", stripeRoute);
 app.use("/api/fetchproduct", productfetchRoute);
 app.use("/api/fetchuser",userfetchRoute);
 app.use("/api/orderdata",orderdata);
-
+app.use("/api/cart",cartproduct)
 // Server setup
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-

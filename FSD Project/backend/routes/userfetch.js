@@ -95,6 +95,3 @@ router.get("/alluser", async (req, res) => {
 });
 
 module.exports = router;
-
-
-

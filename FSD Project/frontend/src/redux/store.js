@@ -1,7 +1,9 @@
 // store.js
+
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import cartReducer from "./cartRedux";
-import userReducer from "./userRedux";
+import userReducer, { loginSuccess } from "./userRedux"; // Import loginSuccess from userRedux
+import { FETCH_CART_SUCCESS, FETCH_CART_FAILURE, fetchCart } from './action'; // Import fetchCart from actions
 import {
   persistStore,
   persistReducer,
@@ -34,6 +36,16 @@ export const store = configureStore({
     }),
 });
 
-export const persistor = persistStore(store);  // Export the persistor
+export const persistor = persistStore(store);
 
+// Middleware to dispatch fetchCart on successful login
+store.subscribe(() => {
+  const { user } = store.getState();
+  if (user.currentUser && user.currentUser.token) {
+    // Assuming you have a loginSuccess action in userRedux.js
+    store.dispatch(loginSuccess(user.currentUser)); // Dispatch loginSuccess with user data
+    store.dispatch(fetchCart(user.currentUser.id));
+  }
+});
 
+export default { store, persistor };

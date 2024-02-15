@@ -11,6 +11,8 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import StripeCheckout from 'react-stripe-checkout';
 import { userRequest } from '../requestMethod';
+import { useDispatch } from 'react-redux';
+
 const KEY = 'pk_test_51OVyM9SBqq3RJksXlACJz3v239mH9KKpBId9wuddMXdCrB6RJtuKhah0gHhGqSIpircX6B3utSeo7CxCuUpN0DX3002nPmLoER';
 
 const Container = styled.div``;
@@ -138,54 +140,77 @@ const SummaryButton = styled.button`
 const Cart = () => {
   const cart = useSelector((state) => state.cart);
   const [stripeToken, setStripeToken] = useState(null);
+  const [clientSecret, setClientSecret] = useState('');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const fetchClientSecret = async () => {
+      try {
+        const response = await userRequest.post("/checkout/payment", {
+          tokenId: stripeToken.id,
+          amount: cart.total * 100,
+        });
+
+        setClientSecret(response.data.clientSecret);
+      } catch (error) {
+        console.error('Error fetching client secret:', error);
+      }
+    };
+
+    if (stripeToken) {
+      fetchClientSecret();
+    }
+  }, [stripeToken, cart.total]);
 
   const onToken = (token) => {
     setStripeToken(token);
   };
+  
 
-  useEffect(() => {
-    const makeRequest = async () => {
-      try {
-        if (stripeToken) {
-          const response = await userRequest.post("/checkout/payment", {
-            tokenId: stripeToken.id,
-            amount: 500,
-          });
-
-          // Log the response for debugging
-          console.log('Server Response:', response);
-
-          navigate("/success", {
-            state: {
-              stripeData: response.data,
-              products: cart,
-            },
-          });
-        }
-      } catch (error) {
-        // Log the error for debugging
-        console.error('Error making request:', error);
+  const handleCheckout = async () => {
+    try {
+      if (!stripeToken) {
+        // Handle the case where stripeToken is not defined
+        console.error('Stripe token is not defined.');
+        return;
       }
-    };
 
-    makeRequest();
-  }, [stripeToken, cart, navigate]);
+      const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: stripeToken.id,
+      });
+
+      if (error) {
+        console.error('Payment confirmation error:', error);
+      } else if (paymentIntent.status === 'succeeded') {
+        navigate("/success", {
+          state: {
+            stripeData: paymentIntent,
+            products: cart.products,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Error confirming card payment:', error);
+    }
+  };
   const handleDelete = async (productId) => {
     try {
       // Make a request to your server to delete the product from the cart
-      const response = await userRequest.delete(`/api/carts/${productId}`);
-      
+      const response = await userRequest.delete(`/cart/${productId}`);
+
       // Assuming the server responds with a success message
       console.log('Product deleted from cart:', response.data);
-      
-      // You may want to update the local state or Redux store here
+
+      // Dispatch deleteProduct action if needed
       // dispatch(deleteProduct(productId));
+
+      // Fetch the updated cart after deleting a product
+      dispatch(fetchCart(userId));
     } catch (error) {
       console.error('Error deleting product from cart:', error);
     }
   };
-
   return (
     <Container>
       {/* <Navbar /> */}
@@ -264,7 +289,7 @@ const Cart = () => {
               token={onToken}
               stripeKey={KEY}
             >
-              <SummaryButton>CHECKOUT NOW</SummaryButton>
+              <SummaryButton onClick={handleCheckout} >CHECKOUT NOW</SummaryButton>
             </StripeCheckout>
           </Summary>
         </Bottom>

@@ -47,7 +47,7 @@ router.post("/login", async (req, res) => {
 
         // Remove password from the response and send accessToken
         const { password, ...others } = user._doc;
-        res.status(200).json({ ...others, accessToken });
+        res.status(200).json({ _id: user._id, ...others, accessToken });
     } catch (err) {
         console.log(err);
         res.status(500).json(err);

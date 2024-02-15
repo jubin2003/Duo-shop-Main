@@ -127,18 +127,23 @@ const Login = () => {
           },
           body: JSON.stringify(formData),
         });
-
+  
         if (response.ok) {
           const data = await response.json();
-          document.cookie = `accessToken=${data.accessToken}; Secure; HttpOnly; SameSite=Strict`;
-          localStorage.setItem('accessToken', data.accessToken);
+  
+          // Make sure the server response includes the userId
+          const { _id: userId, accessToken, isAdmin, ...otherUserDetails } = data;  
+          // Store user ID in sessionStorage
+          sessionStorage.setItem('userId', userId);
+  
+          document.cookie = `accessToken=${accessToken}; Secure; HttpOnly; SameSite=Strict`;
+          localStorage.setItem('accessToken', accessToken);
           localStorage.setItem('username', formData.username);
-          localStorage.setItem('isAdmin', data.isAdmin);
-
+          localStorage.setItem('isAdmin', isAdmin);
+  
           setIsLoggedIn(true);
-
-          // Correct the comparison based on the received boolean value
-          if (data.isAdmin) {
+  
+          if (isAdmin) {
             toast.success('Login successfully');
             navigate('/admindashboard');
           } else {
@@ -147,13 +152,11 @@ const Login = () => {
           }
         } else {
           console.error('Login failed!');
-          toast.error('Login Failed Try Again');
-
+          toast.error('Login Failed. Try Again');
         }
       } catch (error) {
         console.error('Error during login:', error);
-        toast.error('Error occured during login ');
-
+        toast.error('Error occurred during login');
       }
     }
   };

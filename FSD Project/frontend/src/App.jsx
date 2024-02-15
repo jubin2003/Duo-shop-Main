@@ -8,7 +8,7 @@ import Register from './pages/Register';
 import Product from './pages/Product';
 import Success from './pages/Success';
 import UserHome from './pages/UserHome';
-import AdminDashboard from './admin/admindashboard';
+import AdminDashboard from './admin/AdminDashboard';
 import AddProduct from '../src/adminfunctionalites/AddProduct';
 import ViewProduct from '../src/adminfunctionalites/ViewProduct';
 import ViewUsers from '../src/adminfunctionalites/ViewUsers';

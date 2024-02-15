@@ -92,13 +92,15 @@ const Button = styled.button`
 const NavBarUser = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
-
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Define isLoggedIn state
+  const [isAdmin, setIsAdmin] = useState(false); // Define isAdmin state
   useEffect(() => {
     const storedUsername = localStorage.getItem('username');
     const accessToken = localStorage.getItem('accessToken');
 
     if (storedUsername && accessToken) {
       setUsername(storedUsername);
+      setIsLoggedIn(true);
     } else {
       navigate('/login');
     }
@@ -118,9 +120,22 @@ const NavBarUser = () => {
   }, [navigate]);
 
   const handleLogout = () => {
+    // Clear user-related data
+    document.cookie = 'accessToken=; Secure; HttpOnly; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
     localStorage.removeItem('accessToken');
-    localStorage.removeItem('username');
-    navigate('/');
+    localStorage.removeItem('isAdmin');
+    sessionStorage.removeItem('userId');
+    localStorage.removeItem('cart');
+
+    // Clear cart-related data
+    localStorage.removeItem('cartProducts');
+
+    // Update state or dispatch actions as needed
+    setIsLoggedIn(false);
+    setIsAdmin(false);
+
+    // Navigate to the login page or another appropriate route
+    navigate('/login');
   };
 
   const quantity = useSelector((state) => state.cart.quantity);
