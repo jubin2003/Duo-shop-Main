@@ -8,9 +8,17 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    
-},{
-    timestamps:true
+    name: {
+        type: String,
+        required:true, // Change to true if you want it to be a required field
+        default: '' // Add a default value if needed
+    },
+    address: String,
+    pincode: String,
+    landmark: String,
+    phoneNumber: String,
+}, {
+    timestamps: true
 }); 
 
 module.exports = mongoose.model('User', userSchema);

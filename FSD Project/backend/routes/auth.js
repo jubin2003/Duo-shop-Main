@@ -9,7 +9,20 @@ router.post("/register", async (req, res) => {
         username: req.body.username,
         email: req.body.email,
         password: CryptoJS.AES.encrypt(req.body.password, process.env.PASS_SEC).toString(),
+        name: req.body.name,
+        address: req.body.address,
+        pincode: req.body.pincode,
+        landmark: req.body.email,
+        phoneNumber: req.body.phoneNumber
     });
+
+    // Corrected the parameter to { username: req.body.username }
+    const existingUser = await User.findOne({ username: req.body.username });
+
+    if (existingUser) {
+        return res.status(400).json({ error: 'User already exists' });
+    }
+
     try {
         const savedUser = await newUser.save();
         res.status(201).json(savedUser);
@@ -17,6 +30,7 @@ router.post("/register", async (req, res) => {
         res.status(500).json(err);
     }
 });
+
 
 // LOGIN
 router.post("/login", async (req, res) => {

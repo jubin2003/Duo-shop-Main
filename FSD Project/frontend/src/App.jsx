@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import Product from './pages/Product';
 import Success from './pages/Success';
 import UserHome from './pages/UserHome';
+import BuyNow from './pages/BuyNow';  
 import AdminDashboard from './admin/AdminDashboard';
 import AddProduct from '../src/adminfunctionalites/AddProduct';
 import ViewProduct from '../src/adminfunctionalites/ViewProduct';
@@ -32,6 +33,7 @@ const App = () => {
         <Route path="/product/:id" element={<Product />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/success" element={<Success />} />
+        <Route path="/buynow" element={<BuyNow />} />
         {/* <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} /> */}
         {/* <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} /> */}
         <Route path="/login" element={<Login />} />

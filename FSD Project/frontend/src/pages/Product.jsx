@@ -1,3 +1,4 @@
+// Import necessary dependencies
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -5,9 +6,11 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import axios from 'axios';
 import { addProduct } from '../redux/cartRedux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+// Styled components
 const Container = styled.div``;
 const Wrapper = styled.div`
   padding: 50px;
@@ -94,8 +97,9 @@ const Button = styled.button`
     background-color: #f8f4f4;
   }
 `;
+
+// Function to fetch cart data
 const fetchCart = async (userId) => {
-  
   try {
     const response = await fetch(`http://localhost:5000/api/cart/find/${userId}`);
     const data = await response.json();
@@ -110,27 +114,28 @@ const fetchCart = async (userId) => {
     console.error('Error fetching cart data:', error);
   }
 };
+
+// Product component
 const Product = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const [product, setProduct] = useState({});
   const [quantity, setQuantity] = useState(1);
   const [color, setColor] = useState('');
   const [size, setSize] = useState('');
   const dispatch = useDispatch();
-
   useEffect(() => {
-    const id = window.location.pathname.split('/')[2];
     const getProduct = async () => {
       try {
         const res = await axios.get(`http://localhost:5000/api/products/find/${id}`);
         setProduct(res.data);
-        sessionStorage.setItem('productId', res.data._id);
       } catch (err) {
         console.error('Error fetching product:', err);
       }
     };
     getProduct();
-  }, []);
+  }, [id]);
+  
 
   const userId = sessionStorage.getItem('userId');
 
@@ -155,7 +160,7 @@ const Product = () => {
       const userId = sessionStorage.getItem('userId');
       const productId = sessionStorage.getItem('productId');
       const quantity = 1;
-  
+
       if (!userId) {
         // If userId is not present, show alert and redirect to login
         toast.warning('Please log in to add products to the cart.', {
@@ -165,7 +170,7 @@ const Product = () => {
         navigate('/login');
         return;
       }
-  
+
       console.log(productId);
       // Make a POST request to the backend to add the product to the cart
       const response = await fetch('http://localhost:5000/api/cart/add', {
@@ -178,7 +183,7 @@ const Product = () => {
           product: { productId, quantity }, // Nest productId and quantity inside the product object
         }),
       });
-  
+
       if (response.ok) {
         // If the response is successful, display a success message
         console.log('Product added to cart successfully.');
@@ -203,52 +208,90 @@ const Product = () => {
       });
     }
   };
-  
+
+  const handleBuynow = () => {
+    // Check if the user is logged in
+    const userId = sessionStorage.getItem('userId');
+    const productId = sessionStorage.getItem('productId');
+    if (!userId) {
+      // If userId is not present, show an alert and redirect to login
+      alert('Please log in to buy products.');
+      navigate('/login'); // Adjust the login route accordingly
+      return;
+    }
+
+    // Validate that the required selections are made before proceeding
+    // if (!color || !size) {
+    //   alert('Please select color and size before buying.');
+    //   return;
+    // }
+
+    // Save the selected product details to session storage
+    const selectedProduct = {
+      _id: product._id,
+      title: product.title,
+      quantity,
+      color,
+      size,
+    };
+    sessionStorage.setItem('selectedProduct', JSON.stringify(selectedProduct));
+
+    // Navigate to the BuyNow page with product ID and quantity as query parameters
+    navigate('/buynow', {
+
+      state: {
+      productId,
+        quantity,
+      },
+    });
+  };
+
   return (
     <>
-    
-    <Container>
-      <Wrapper>
-        <ImgContainer>
-          <Image src={product.img} alt="Product Image" />
-        </ImgContainer>
-        <InfoContainer>
-          <Title>{product.title}</Title>
-          <Desc>{product.desc}</Desc>
-          <Price>Rs.{product.price}</Price>
-          <FilterContainer>
-            <Filter>
-              <FilterTitle>Color</FilterTitle>
-              {Array.isArray(product.color) &&
-                product.color.map((c) => (
-                  <FilterColor
-                    color={c}
-                    key={c}
-                    onClick={() => handleColorChange(c)}
-                  />
-                ))}
-            </Filter>
-            <Filter>
-              <FilterTitle>Size</FilterTitle>
-              <FilterSize onChange={handleSizeChange}>
-                {Array.isArray(product.size) &&
-                  product.size.map((s) => (
-                    <FilterSizeOption key={s}>{s}</FilterSizeOption>
+      <Container>
+        <Wrapper>
+          <ImgContainer>
+            <Image src={product.img} alt="Product Image" />
+          </ImgContainer>
+          <InfoContainer>
+            <Title>{product.title}</Title>
+            <Desc>{product.desc}</Desc>
+            <Price>Rs.{product.price}</Price>
+            <FilterContainer>
+              <Filter>
+                <FilterTitle>Color</FilterTitle>
+                {Array.isArray(product.color) &&
+                  product.color.map((c) => (
+                    <FilterColor
+                      color={c}
+                      key={c}
+                      onClick={() => handleColorChange(c)}
+                    />
                   ))}
-              </FilterSize>
-            </Filter>
-          </FilterContainer>
-          <AddContainer>
-            <AmountContainer>
-              <RemoveCircleOutlineIcon onClick={() => handleQuantity('dec')} />
-              <Amount>{quantity}</Amount>
-              <AddCircleOutlineIcon onClick={() => handleQuantity('inc')} />
-            </AmountContainer>
-            <Button onClick={handleClick}>ADD TO CART</Button>
-          </AddContainer>
-        </InfoContainer>
-      </Wrapper>
-    </Container>
+              </Filter>
+              <Filter>
+                <FilterTitle>Size</FilterTitle>
+                <FilterSize onChange={handleSizeChange}>
+                  {Array.isArray(product.size) &&
+                    product.size.map((s) => (
+                      <FilterSizeOption key={s}>{s}</FilterSizeOption>
+                    ))}
+                </FilterSize>
+              </Filter>
+            </FilterContainer>
+            <AddContainer>
+              <AmountContainer>
+                <RemoveCircleOutlineIcon onClick={() => handleQuantity('dec')} />
+                <Amount>{quantity}</Amount>
+                <AddCircleOutlineIcon onClick={() => handleQuantity('inc')} />
+              </AmountContainer>
+              <Button onClick={handleClick}>ADD TO CART</Button>
+              <hr></hr><hr></hr><hr></hr>
+              <Button onClick={handleBuynow}>BUY Now</Button>
+            </AddContainer>
+          </InfoContainer>
+        </Wrapper>
+      </Container>
     </>
   );
 };
