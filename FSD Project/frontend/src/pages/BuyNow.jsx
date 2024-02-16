@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Typography, TextField, Button, Grid, Card, CardMedia, Paper } from '@mui/material';
 import { styled } from '@mui/system';
-
+import axios from 'axios'; // Import axios
 const StyledContainer = styled(Grid)({
   padding: '20px',
 });
@@ -128,6 +128,81 @@ const BuyNow = () => {
     console.log('Quantity:', quantity);
     console.log('Total Value:', totalValue);
   };
+// Move the loadScript and displayRazorpay functions inside BuyNow component
+const loadScript = async (src) => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = () => {
+        resolve(true);
+      };
+      script.onerror = () => {
+        resolve(false);
+      };
+      document.body.appendChild(script);
+    });
+  };
+
+  const displayRazorpay = async () => {
+    const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js');
+
+    if (!res) {
+      alert('Razorpay SDK failed to load. Are you online?');
+      return;
+    }
+
+    try {
+      const result = await axios.post('http://localhost:5000/api/payment/orders');
+
+      if (!result) {
+        alert('Server error. Are you online?');
+        return;
+      }
+
+      const { amount, id: order_id, currency } = result.data;
+
+      const options = {
+        key: 'rzp_test_qSuIgz3hFLcQ68', // Enter the Key ID generated from the Dashboard
+        amount: amount.toString(),
+        currency: currency,
+        name: 'Duo Clothing',
+        description: 'Test Transaction',
+        image:"https://www.logotypes101.com/logos/650/4D9F7231ECDCC11B64396DC74395DCC8/duo.png" ,
+        order_id: order_id,
+        handler: async function (response) {
+          const data = {
+            orderCreationId: order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpayOrderId: response.razorpay_order_id,
+            razorpaySignature: response.razorpay_signature,
+          };
+
+          const result = await axios.post('http://localhost:5000/payment/success', data);
+
+          alert(result.data.msg);
+
+          // Use window.location to navigate to the Success page
+          window.location.href = '/success'; 
+        },
+        prefill: {
+          name: 'Jubin Thomas',
+          email: 'Duo@gmail.com',
+          contact: '9568124578',
+        },
+        notes: {
+          address: 'Duo Clothing Store , Kottayam,Kerala,Pincode:686522',
+        },
+        theme: {
+          color: '#0593ba',
+        },
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+    } catch (error) {
+      console.error('Error during Razorpay payment:', error);
+    }
+  };
 
   return (
     <StyledContainer container justifyContent="center">
@@ -162,7 +237,7 @@ const BuyNow = () => {
                   Description: {product.desc}
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                  Price: Rs.{product.price}
+                  Price: {product.price}
                 </Typography>
                 <Typography variant="body1" gutterBottom>
                   Quantity: {quantity}
@@ -199,7 +274,7 @@ const BuyNow = () => {
                   label="Shipping Address"
                   variant="outlined"
                   fullWidth
-                  value={currentUser.address}
+                  value={shippingAddress}
                   onChange={(e) => setShippingAddress(e.target.value)}
                   required
                 />
@@ -207,7 +282,7 @@ const BuyNow = () => {
                   label="Phone Number"
                   variant="outlined"
                   fullWidth
-                  value={currentUser.phoneNumber}
+                  value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   required
                 />
@@ -215,7 +290,7 @@ const BuyNow = () => {
                   label="Landmark"
                   variant="outlined"
                   fullWidth
-                  value={currentUser.landmark}
+                  value={landmark}
                   onChange={(e) => setLandmark(e.target.value)}
                   required
                 />
@@ -226,7 +301,7 @@ const BuyNow = () => {
                   value={alternatePhoneNumber}
                   onChange={(e) => setAlternatePhoneNumber(e.target.value)}
                 />
-                <StyledButton type="submit" variant="contained" color="primary" fullWidth>
+                <StyledButton type="submit" variant="contained" color="primary" fullWidth onClick={displayRazorpay}>
                   Proceed to payment
                 </StyledButton>
               </StyledForm>

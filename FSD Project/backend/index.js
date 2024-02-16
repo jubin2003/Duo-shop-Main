@@ -43,6 +43,7 @@ const productfetchRoute = require("./routes/productfetch");
 const userfetchRoute = require("./routes/userfetch");
 const orderdata = require("./routes/orderdata");
 const cartproduct = require("./routes/cartproduct");
+const paymentRoute = require("./routes/payment");
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/products", productRoute);
@@ -52,7 +53,8 @@ app.use("/api/checkout", stripeRoute);
 app.use("/api/fetchproduct", productfetchRoute);
 app.use("/api/fetchuser",userfetchRoute);
 app.use("/api/orderdata",orderdata);
-app.use("/api/cart",cartproduct)
+app.use("/api/cart",cartproduct);
+app.use("/api/payment",paymentRoute);
 // Server setup
 const PORT = process.env.PORT || 5000;
 
