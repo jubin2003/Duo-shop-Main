@@ -85,29 +85,29 @@ const BuyNow = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        let productId = id;
+        let selectedProduct = sessionStorage.getItem('selectedProduct');
 
-        // If id is not defined, get productId from sessionStorage
-        if (!productId) {
-          productId = sessionStorage.getItem('productId');
+        if (!selectedProduct) {
+          console.error('Selected product details not found in sessionStorage.');
+          return;
         }
 
-        if (productId) {
-          const response = await fetch(`http://localhost:5000/api/products/find/${productId}`);
-          if (!response.ok) {
-            throw new Error('Error fetching product details');
-          }
-          const data = await response.json();
-          console.log('Fetched product data:', data);
-          setProduct(data);
+        selectedProduct = JSON.parse(selectedProduct);
+
+        const response = await fetch(`http://localhost:5000/api/products/find/${selectedProduct._id}`);
+        if (!response.ok) {
+          throw new Error('Error fetching product details');
         }
+        
+        const data = await response.json();
+        console.log('Fetched product data:', data);
+        setProduct(data);
       } catch (error) {
         console.error('Error fetching product details:', error);
       }
     };
     fetchProduct();
-  }, [id]); 
-
+  }, []);
   useEffect(() => {
     if (product) {
       const totalPrice = product.price * quantity;
@@ -162,14 +162,14 @@ const BuyNow = () => {
                   Description: {product.desc}
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                  Price: ${product.price}
+                  Price: Rs.{product.price}
                 </Typography>
                 <Typography variant="body1" gutterBottom>
                   Quantity: {quantity}
                 </Typography>
               </>
             )}
-            <TotalValueBox>Total Value: ${totalValue}</TotalValueBox>
+            <TotalValueBox>Total Price: Rs.{totalValue}</TotalValueBox>
           </StyledPaper>
         </Grid>
         <Grid item xs={12} md={6}>

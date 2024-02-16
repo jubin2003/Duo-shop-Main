@@ -9,6 +9,8 @@ import { addProduct } from '../redux/cartRedux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Announcement from '../components/Announcement';
+import Footer from '../components/Footer';
 
 // Styled components
 const Container = styled.div``;
@@ -156,22 +158,31 @@ const Product = () => {
   };
 
   const handleClick = async () => {
+    const productId = product._id;
+    sessionStorage.setItem('productId', productId);
+    const userId = sessionStorage.getItem('userId');
+    
+    // Check if user is logged in
+    if (!userId) {
+      // Redirect to login page or handle authentication logic
+      alert("login first");
+      window.location.href = '/login';
+      return;
+    }
     try {
       const userId = sessionStorage.getItem('userId');
       const productId = sessionStorage.getItem('productId');
       const quantity = 1;
-
-      if (!userId) {
-        // If userId is not present, show alert and redirect to login
-        toast.warning('Please log in to add products to the cart.', {
+  
+      // Check if userId and productId are present
+      if (!userId || !productId) {
+        toast.warning('Invalid user or product information.', {
           autoClose: 3000,
           className: 'custom-toast',
         });
-        navigate('/login');
         return;
       }
-
-      console.log(productId);
+      
       // Make a POST request to the backend to add the product to the cart
       const response = await fetch('http://localhost:5000/api/cart/add', {
         method: 'POST',
@@ -180,25 +191,26 @@ const Product = () => {
         },
         body: JSON.stringify({
           userId,
-          product: { productId, quantity }, // Nest productId and quantity inside the product object
+          product: { productId, quantity },
         }),
       });
-
-      if (response.ok) {
-        // If the response is successful, display a success message
-        console.log('Product added to cart successfully.');
-        dispatch(addProduct({ ...product, quantity, color, size }));
-        fetchCart(userId);
-        // You may choose to fetch the updated cart information here if needed
-        // fetchCart(userId);
-      } else {
-        // If there's an error in the response, handle it accordingly
+  
+      // Check for fetch errors
+      if (!response.ok) {
         const errorData = await response.json();
         toast.error(`Error adding product to cart: ${errorData.error}`, {
           autoClose: 3000,
           className: 'custom-toast',
         });
+        return;
       }
+      alert("product added to cart succesfully");
+      // If the response is successful, display a success message
+      console.log('Product added to cart successfully.');
+      dispatch(addProduct({ ...product, quantity, color, size }));
+      fetchCart(userId);
+      // You may choose to fetch the updated cart information here if needed
+      // fetchCart(userId);
     } catch (error) {
       // Handle unexpected errors
       console.error('Error adding product to cart:', error);
@@ -212,6 +224,7 @@ const Product = () => {
   const handleBuynow = () => {
     // Check if the user is logged in
     const userId = sessionStorage.getItem('userId');
+  
     const productId = sessionStorage.getItem('productId');
     if (!userId) {
       // If userId is not present, show an alert and redirect to login
@@ -219,13 +232,7 @@ const Product = () => {
       navigate('/login'); // Adjust the login route accordingly
       return;
     }
-
-    // Validate that the required selections are made before proceeding
-    // if (!color || !size) {
-    //   alert('Please select color and size before buying.');
-    //   return;
-    // }
-
+  
     // Save the selected product details to session storage
     const selectedProduct = {
       _id: product._id,
@@ -235,19 +242,18 @@ const Product = () => {
       size,
     };
     sessionStorage.setItem('selectedProduct', JSON.stringify(selectedProduct));
-
+  
     // Navigate to the BuyNow page with product ID and quantity as query parameters
     navigate('/buynow', {
-
       state: {
-      productId,
+        productId,
         quantity,
       },
     });
   };
-
   return (
     <>
+    <Announcement/>
       <Container>
         <Wrapper>
           <ImgContainer>
@@ -292,6 +298,7 @@ const Product = () => {
           </InfoContainer>
         </Wrapper>
       </Container>
+      <Footer/>
     </>
   );
 };
