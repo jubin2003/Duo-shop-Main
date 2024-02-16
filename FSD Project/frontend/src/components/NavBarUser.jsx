@@ -125,11 +125,13 @@ const NavBarUser = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('isAdmin');
     sessionStorage.removeItem('userId');
+    sessionStorage.removeItem('productId');
+
     localStorage.removeItem('cart');
 
     // Clear cart-related data
     localStorage.removeItem('cartProducts');
-
+    localStorage.removeItem('persist:root');
     // Update state or dispatch actions as needed
     setIsLoggedIn(false);
     setIsAdmin(false);

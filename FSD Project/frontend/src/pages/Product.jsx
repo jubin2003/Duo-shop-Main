@@ -124,6 +124,7 @@ const Product = () => {
       try {
         const res = await axios.get(`http://localhost:5000/api/products/find/${id}`);
         setProduct(res.data);
+        sessionStorage.setItem('productId', res.data._id);
       } catch (err) {
         console.error('Error fetching product:', err);
       }
@@ -149,23 +150,60 @@ const Product = () => {
     setSize(event.target.value);
   };
 
-  const handleClick = () => {
-    const userId = sessionStorage.getItem('userId');
-    if (!userId) {
-      // If userId is not present, show alert and redirect to login
-      toast.warning('Please log in to add products to the cart.', {
-        // position: toast.POSITION.TOP_CENTER,
+  const handleClick = async () => {
+    try {
+      const userId = sessionStorage.getItem('userId');
+      const productId = sessionStorage.getItem('productId');
+      const quantity = 1;
+  
+      if (!userId) {
+        // If userId is not present, show alert and redirect to login
+        toast.warning('Please log in to add products to the cart.', {
+          autoClose: 3000,
+          className: 'custom-toast',
+        });
+        navigate('/login');
+        return;
+      }
+  
+      console.log(productId);
+      // Make a POST request to the backend to add the product to the cart
+      const response = await fetch('http://localhost:5000/api/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          product: { productId, quantity }, // Nest productId and quantity inside the product object
+        }),
+      });
+  
+      if (response.ok) {
+        // If the response is successful, display a success message
+        console.log('Product added to cart successfully.');
+        dispatch(addProduct({ ...product, quantity, color, size }));
+        fetchCart(userId);
+        // You may choose to fetch the updated cart information here if needed
+        // fetchCart(userId);
+      } else {
+        // If there's an error in the response, handle it accordingly
+        const errorData = await response.json();
+        toast.error(`Error adding product to cart: ${errorData.error}`, {
+          autoClose: 3000,
+          className: 'custom-toast',
+        });
+      }
+    } catch (error) {
+      // Handle unexpected errors
+      console.error('Error adding product to cart:', error);
+      toast.error('Internal Server Error', {
         autoClose: 3000,
         className: 'custom-toast',
       });
-      navigate('/login');
-      return; // Add a return statement to prevent further execution
     }
-
-    dispatch(addProduct({ ...product, quantity, color, size }));
-    fetchCart(userId);
   };
-
+  
   return (
     <>
     

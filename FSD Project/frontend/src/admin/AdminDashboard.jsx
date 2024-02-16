@@ -38,6 +38,7 @@ const AdminDashboard = () => {
           <div className="col-md-12">
             <h1 className="mt-5">Welcome to the Admin Dashboard</h1>
           </div>
+          
           <br />
           <br />
           {/* <ChartView/> */}
