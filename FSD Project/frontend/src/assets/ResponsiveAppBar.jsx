@@ -48,12 +48,16 @@ function ResponsiveAppBar() {
   React.useEffect(() => {
     const handleBrowserBack = (event) => {
       event.preventDefault();
-      navigate('/login');
+      if (!isLoggedIn) {
+        navigate('/login');
+      }
     };
 
     const handleBrowserForward = (event) => {
       event.preventDefault();
-      navigate('/login');
+      if (!isLoggedIn) {
+        navigate('/login');
+      }
     };
 
     if (!isLoggedIn) {

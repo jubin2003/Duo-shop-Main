@@ -223,9 +223,11 @@ const Product = () => {
 
   const handleBuynow = () => {
     // Check if the user is logged in
+    const productId = product._id;
+    sessionStorage.setItem('productId', productId);
     const userId = sessionStorage.getItem('userId');
   
-    const productId = sessionStorage.getItem('productId');
+    const productID = sessionStorage.getItem('productId');
     if (!userId) {
       // If userId is not present, show an alert and redirect to login
       alert('Please log in to buy products.');
@@ -246,7 +248,7 @@ const Product = () => {
     // Navigate to the BuyNow page with product ID and quantity as query parameters
     navigate('/buynow', {
       state: {
-        productId,
+        productID,
         quantity,
       },
     });

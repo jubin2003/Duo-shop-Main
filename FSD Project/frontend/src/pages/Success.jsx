@@ -1,67 +1,68 @@
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom"; // Import useNavigate
-import { userRequest } from "../requestMethod";
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Typography, Paper } from '@mui/material';
 
 const Success = () => {
   const location = useLocation();
-  const navigate = useNavigate(); // Replace useHistory with useNavigate
+  const queryParams = new URLSearchParams(location.search);
+  const orderId = queryParams.get('orderId');
 
-  // Extracting Razorpay response data
-  const razorpayResponse = location.state.razorpayResponse;
-  const cart = location.state.cart;
-  const currentUser = useSelector((state) => state.user.currentUser);
-  const [orderId, setOrderId] = useState(null);
+  const [orderDetails, setOrderDetails] = useState(null);
 
   useEffect(() => {
-    const createOrder = async () => {
+    const fetchOrderDetails = async () => {
       try {
-        // Use Razorpay response data to extract relevant information
-        const res = await userRequest.post("/orders", {
-          userId: currentUser._id,
-          products: cart.products.map((item) => ({
-            productId: item._id,
-            quantity: item._quantity,
-          })),
-          amount: razorpayResponse.amount,
-          address: razorpayResponse.notes.address,
-          // Add any additional information needed for your order creation
-        });
+        const response = await fetch(`http://localhost:5000/api/order/${orderId}`);
+        if (!response.ok) {
+          throw new Error('Error fetching order details');
+        }
 
-        setOrderId(res.data._id);
+        const data = await response.json();
+        console.log('Order Details:', data);
+        setOrderDetails(data);
       } catch (error) {
-        console.error("Error creating order:", error);
+        console.error('Error fetching order details:', error);
       }
     };
 
-    // Check if Razorpay response is available before creating the order
-    razorpayResponse && createOrder();
-  }, [cart, razorpayResponse, currentUser]);
-
-  const goToHomepage = () => {
-    // Redirect to the homepage using navigate
-    navigate("/userhome");
-  };
+    if (orderId) {
+      fetchOrderDetails();
+    }
+  }, [orderId]);
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {orderId ? (
-        `Order has been created successfully. Your order number is ${orderId}`
-      ) : (
-        `Successful. Your order is being prepared...`
+    <Paper elevation={3} style={{ padding: '20px', margin: '20px' }}>
+      <Typography variant="h4" align="center" gutterBottom>
+        Order Placed Successfully
+      </Typography>
+      {orderDetails && (
+        <>
+          <Typography variant="body1" gutterBottom>
+            Order ID: {orderDetails._id}
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            Customer Name: {orderDetails.customerDetails.name}
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            Customer Email: {orderDetails.customerDetails.email}
+          </Typography>
+          {/* Add more order details based on your data structure */}
+          <Typography variant="body1" gutterBottom>
+            Address: {orderDetails.customerDetails.address}
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            Contact: {orderDetails.customerDetails.contact}
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+      Product ID: {orderDetails.productId}
+    </Typography>
+    <Typography variant="body1" gutterBottom>
+      Quantity: {orderDetails.quantity}
+    </Typography>
+          {/* Add more fields as needed */}
+        </>
       )}
-      <button style={{ padding: 10, marginTop: 20 }} onClick={goToHomepage}>
-        Go to Homepage
-      </button>
-    </div>
+    </Paper>
   );
 };
 
