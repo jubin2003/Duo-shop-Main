@@ -38,6 +38,7 @@ const MediaCard = () => {
 
     fetchData();
   }, []);
+  
 
   return (
     <Grid container spacing={2}>
@@ -94,10 +95,10 @@ const MediaCard = () => {
           />
           <CardContent>
             <Typography gutterBottom variant="h5" component="div">
-              Payment Amount: {productCount}
+              Order {productCount}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Amount Received From Users
+              Number of Orders
             </Typography>
           </CardContent>
           <CardActions>

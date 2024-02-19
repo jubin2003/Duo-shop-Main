@@ -7,7 +7,14 @@ import { grey } from '@mui/material/colors';
 import { mobile } from '../Responsive';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-
+import {
+  ShoppingCartOutlined,
+  Menu,
+  AccountCircle,
+  LocalMall,
+  LocalOffer,
+} from '@mui/icons-material';
+import { MenuItem as MuiMenuItem } from '@mui/material';
 const Container = styled.div`
   height: 60px;
   ${mobile({ height: '50px' })}
@@ -63,7 +70,7 @@ const Right = styled.div`
   ${mobile({ flex: 2, justifyContent: 'center' })}
 `;
 
-const MenuItem = styled.div`
+const StyledMenuItem = styled.div` 
   font-size: 14px;
   cursor: pointer;
   margin-left: 25px;
@@ -77,18 +84,20 @@ const Text = styled.div`
 
 const buttonStyle = {
   marginRight: '10px',
-  padding: '10px 15px',
-  backgroundColor: 'white',
-  color: 'black',
+  padding: '6px 15px',
+  backgroundColor: 'teal',
+  color: 'white',
   textDecoration: 'none',
-  borderRadius: '5px',
+  borderRadius: '23px',
   cursor: 'pointer',
 };
 
 const Button = styled.button`
   ${buttonStyle}
 `;
-
+const IconWrapper = styled.span`
+  margin-right: 10px;
+`;
 const NavBarUser = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
@@ -144,30 +153,35 @@ const NavBarUser = () => {
 
   return (
     <Container>
-      <Wrapper>
-        <Left>
-          <Language>EN</Language>
-          <SearchContainer>
-            <Input placeholder="search" />
-            <Search style={{ color: grey[500], fontSize: 16 }} />
-          </SearchContainer>
-        </Left>
-        <Center>
-          <Logo>Duo</Logo>
-        </Center>
-        <Right>
-          <Text>{username ? `Hello, ${username}!` : 'User Profile'}</Text>
-          <Link to="/cart">
-            <MenuItem>
-              <Badge badgeContent={quantity} color="primary">
-                <ShoppingCartOutlinedIcon />
-              </Badge>
-            </MenuItem>
-          </Link>
-          <Button onClick={handleLogout}>Logout</Button>
-        </Right>
-      </Wrapper>
-    </Container>
+    <Wrapper>
+      <Left>
+        <Language>EN</Language>
+        <SearchContainer>
+          <Input placeholder="search" />
+          <Search style={{ color: grey[500], fontSize: 16 }} />
+        </SearchContainer>
+      </Left>
+      <Center>
+        <Logo>Duo</Logo>
+      </Center>
+      <Right>
+        <Text>{username ? `Hello, ${username}!` : 'User Profile'}</Text>
+        <Link to="/profile" style={{ textDecoration: 'none', color: 'white' }}>
+          <IconWrapper>
+            <AccountCircle style={{ color: 'black', fontSize: 24, cursor: 'pointer' }} />
+          </IconWrapper>
+        </Link>
+        <Link to="/cart">
+          <StyledMenuItem> {/* Use the renamed styled component */}
+            <Badge badgeContent={quantity} color="primary">
+              <ShoppingCartOutlinedIcon />
+            </Badge>
+          </StyledMenuItem>
+        </Link>
+        <Button onClick={handleLogout}>Logout</Button>
+      </Right>
+    </Wrapper>
+  </Container>
   );
 };
 

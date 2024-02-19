@@ -14,7 +14,8 @@ import AddProduct from '../src/adminfunctionalites/AddProduct';
 import ViewProduct from '../src/adminfunctionalites/ViewProduct';
 import ViewUsers from '../src/adminfunctionalites/ViewUsers';
 import UpdateProduct from '../src/adminfunctionalites/UpdateProduct';
-
+import ProfilePage from './pages/ProfilePage';
+import ViewOrders from './adminfunctionalites/ViewOrders';
 const App = () => {
   const user = true ; // Replace this with your actual authentication logic
   return (
@@ -22,10 +23,13 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/userhome" element={<UserHome/>} />
+        <Route path="/profile" element={<ProfilePage/>} />
         <Route path="/admindashboard" element={<AdminDashboard />} />
         <Route path="/admindashboard" element={<AdminDashboard />} />
         <Route path="/add-product" element={<AddProduct/>} />
         <Route path="/view-product" element={<ViewProduct/>} />
+        <Route path="/view-orders" element={<ViewOrders/>} />
+
         <Route path="/view-users" element={<ViewUsers/>} />
         <Route path="/update-product/:id" element={<UpdateProduct />} />
         <Route path="/products/:category" element={<ProductList />} />

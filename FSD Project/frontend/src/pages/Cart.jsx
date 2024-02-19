@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Announcement from '../components/Announcement';
 import Footer from '../components/Footer';
@@ -12,7 +12,7 @@ import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import StripeCheckout from 'react-stripe-checkout';
 import { userRequest } from '../requestMethod';
 import { useDispatch } from 'react-redux';
-
+import axios from 'axios';
 const KEY = 'pk_test_51OVyM9SBqq3RJksXlACJz3v239mH9KKpBId9wuddMXdCrB6RJtuKhah0gHhGqSIpircX6B3utSeo7CxCuUpN0DX3002nPmLoER';
 
 const Container = styled.div``;
@@ -141,6 +141,19 @@ const Cart = () => {
   const cart = useSelector((state) => state.cart);
   const [stripeToken, setStripeToken] = useState(null);
   const [clientSecret, setClientSecret] = useState('');
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const quantity = parseInt(queryParams.get('quantity')) || 1;
+  const [userId, setUserId] = useState(null);
+  const [customerName, setCustomerName] = useState('');
+  const [shippingAddress, setShippingAddress] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [landmark, setLandmark] = useState('');
+  const [alternatePhoneNumber, setAlternatePhoneNumber] = useState('');
+  const [currentUser, setCurrentUser] = useState(null);
+  const [product, setProduct] = useState(null);
+  const [totalValue, setTotalValue] = useState(0);
+  const productId = sessionStorage.getItem('productId');
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -209,6 +222,101 @@ const Cart = () => {
       dispatch(fetchCart(userId));
     } catch (error) {
       console.error('Error deleting product from cart:', error);
+    }
+  };
+  // Razorpay
+  const loadScript = async (src) => {
+  
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = () => {
+        resolve(true);
+      };
+      script.onerror = () => {
+        resolve(false);
+      };
+      document.body.appendChild(script);
+    });
+  };
+
+  const displayRazorpay = async () => {
+
+    const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js');
+
+    if (!res) {
+      alert('Razorpay SDK failed to load. Are you online?');
+      return;
+    }
+
+    try {
+      const result = await axios.post('http://localhost:5000/api/payment/orders');
+
+      if (!result) {
+        alert('Server error. Are you online?');
+        return;
+      }
+
+      const { amount, id: order_id, currency } = result.data;
+
+      const options = {
+        key: 'rzp_test_qSuIgz3hFLcQ68', // Enter the Key ID generated from the Dashboard
+        amount: amount.toString(),
+        currency: currency,
+        name: 'Duo Clothing',
+        description: 'Test Transaction',
+        image:"https://www.logotypes101.com/logos/650/4D9F7231ECDCC11B64396DC74395DCC8/duo.png" ,
+    
+        order_id: order_id,
+        handler: async function (response) {
+          const data = {
+            userId: userId,
+            productId: productId, // Assuming product has a valid _id
+            quantity: 1,
+            orderCreationId: order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpayOrderId: response.razorpay_order_id,
+            razorpaySignature: response.razorpay_signature,
+            customerDetails: {
+              name: customerName || 'Jubin Thomas',
+              email: 'Duo@gmail.com',
+              contact: phoneNumber || '9568124578',
+              address: shippingAddress || 'Duo Clothing Store, Kottayam, Kerala, Pincode:686522',
+            }
+          };
+          console.log(data);
+          const orderResponse = await axios.post('http://localhost:5000/api/order', data);
+          console.log('Order details stored in the database:', orderResponse.data);
+            sessionStorage.setItem('orderId', orderResponse.data._id);
+          window.location.href = `/success?orderId=${orderResponse.data._id}`;
+          const result = await axios.post('http://localhost:5000/api/payment/success', data);
+
+          alert(result.data.msg);
+
+          // Use window.location to navigate to the Success page
+          window.location.href = '/success'; 
+        },
+        prefill: {
+        name: customerName || 'Jubin Thomas', // Use the customerName if available, otherwise default to 'Jubin Thomas'
+        email: 'Duo@gmail.com',
+        contact: phoneNumber || '9568124578',
+        address: shippingAddress || 'Duo Clothing Store, Kottayam, Kerala, Pincode:686522',
+        },
+        notes: {
+          customerName: customerName ,
+          shippingAddress: shippingAddress,
+          phone:phoneNumber,
+          billingAddress: shippingAddress,
+        },
+        theme: {
+          color: '#0593ba',
+        },
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+    } catch (error) {
+      console.error('Error during Razorpay payment:', error);
     }
   };
   return (
@@ -289,8 +397,9 @@ const Cart = () => {
               token={onToken}
               stripeKey={KEY}
             >
-              <SummaryButton onClick={handleCheckout} >CHECKOUT NOW</SummaryButton>
-            </StripeCheckout>
+              </StripeCheckout>
+              <SummaryButton onClick={displayRazorpay} >CHECKOUT NOW</SummaryButton>
+            
           </Summary>
         </Bottom>
       </Wrapper>

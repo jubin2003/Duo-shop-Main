@@ -34,7 +34,7 @@ const TemporaryDrawer = () => {
       onKeyDown={toggleDrawer(anchor, false)}
     >
       <List>
-        {['admindashboard','Add Product', 'View Product', 'Update Product', 'Delete Product'].map((text, index) => (
+        {['admindashboard','Add Product', 'View Product',].map((text, index) => (
           <ListItem key={text} disablePadding>
             <ListItemButton component={Link} to={`/${text.replace(/\s+/g, '-').toLowerCase()}`}>
               {/* Use the link to navigate to the corresponding page */}
@@ -48,7 +48,7 @@ const TemporaryDrawer = () => {
       </List>
       <Divider />
       <List>
-        {['View Users', 'Payment Details', 'Report',].map((text, index) => (
+        {['View Users', 'View Orders', 'Report',].map((text, index) => (
           <ListItem key={text} disablePadding>
             <ListItemButton component={Link} to={`/${text.replace(/\s+/g, '-').toLowerCase()}`}>
               {/* Use the link to navigate to the corresponding page */}

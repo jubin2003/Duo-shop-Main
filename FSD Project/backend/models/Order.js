@@ -14,7 +14,7 @@ const orderSchema = new mongoose.Schema({
     contact: { type: String, required: true },
     address: { type: String, required: true },
   },
-  // Add more fields as needed
+  status: { type: String, enum: ['Order Placed', 'Processing', 'Shipped', 'Delivered', 'Canceled', 'Pending'], default: 'Order Placed' },
 });
 
 const Order = mongoose.model('Order', orderSchema);

@@ -144,7 +144,7 @@ const Slider = () => {
               <Image src="../../images/slide3.png" width={650} height={550} />
             </ImgContainer>
             <InfoContainer>
-              <Title>MOONSOON SALE</Title>
+              <Title>MONSOON SALE</Title>
               <Description>DON'T COMPROMISE ON STYLE! GET UPTO 30% OFF FOR NEW ARRIVALS</Description>
               <Button>SHOW NOW</Button>
             </InfoContainer>

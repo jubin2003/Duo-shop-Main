@@ -196,7 +196,8 @@ const loadScript = async (src) => {
           console.log(data);
           const orderResponse = await axios.post('http://localhost:5000/api/order', data);
           console.log('Order details stored in the database:', orderResponse.data);
-          window.location.href = `/success?orderId=${orderResponse.data._id}`;
+            sessionStorage.setItem('orderId', orderResponse.data._id);
+          // window.location.href = `/success?orderId=${orderResponse.data._id}`;
           const result = await axios.post('http://localhost:5000/api/payment/success', data);
 
           alert(result.data.msg);

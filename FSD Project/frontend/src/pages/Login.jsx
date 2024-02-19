@@ -152,7 +152,7 @@ const Login = () => {
           }
         } else {
           console.error('Login failed!');
-          toast.error('Login Failed. Try Again');
+          toast.error('Login Failed Check Credentials');
         }
       } catch (error) {
         console.error('Error during login:', error);

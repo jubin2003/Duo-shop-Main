@@ -93,5 +93,17 @@ router.get("/alluser", async (req, res) => {
     res.status(500).json(err);
   }
 });
-
+// Update user profile 
+router.put("/user/:id", async (req, res) => {
+  try {
+      const updatedUser = await User.findByIdAndUpdate(
+          req.params.id,
+          { $set: req.body },
+          { new: true }
+      );
+      res.status(200).json(updatedUser);
+  } catch (err) {
+      res.status(500).json(err);
+  }
+});
 module.exports = router;

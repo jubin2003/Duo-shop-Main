@@ -14,19 +14,23 @@ const Order = require("../models/Order");
     });
 
     //update
-     router.put("/:id",async(req,res)=>{
-        try{
+    router.put("/:id", async (req, res) => {
+        try {
+            // Trim extra whitespace from the id parameter
+            const orderId = req.params.id.trim();
+    
             const updatedOrder = await Order.findByIdAndUpdate(
-                req.params.id,{
-                    $set:req.body,
-                },{ new :true }
-            ); 
+                orderId,
+                { status: req.body.status },
+                { new: true }
+            );
+    
             res.status(200).json(updatedOrder);
-        }catch(err){
-            res.status.json(500)(err);
+        } catch (err) {
+            res.status(500).json(err);
         }
-        });
-
+    });
+    
         // delete 
         router.delete("/:id",async(req,res)=>{
             try{
@@ -36,7 +40,7 @@ const Order = require("../models/Order");
                 res.status(500).json(err);
             }
         });    
-
+   
         // get user orders
 
         router.get("/find/:userId",async(req,res)=>{
@@ -61,7 +65,29 @@ const Order = require("../models/Order");
 
             }
         }); 
-
+        router.put('/order/:orderId', async (req, res) => {
+            const { orderId } = req.params;
+            const { status } = req.body;
+          
+            try {
+              // Validate if orderId is a valid ObjectId
+              if (!mongoose.Types.ObjectId.isValid(orderId)) {
+                return res.status(400).json({ message: 'Invalid orderId format' });
+              }
+          
+              // Find and update the order by orderId
+              const updatedOrder = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
+          
+              if (!updatedOrder) {
+                return res.status(404).json({ message: 'Order not found' });
+              }
+          
+              res.json(updatedOrder);
+            } catch (error) {
+              console.error('Error updating order status:', error);
+              res.status(500).json({ message: 'Internal Server Error' });
+            }
+          });
         //GET MONTHLY INCOME
         router.get("/income",  async (req, res) => {
             const date = new Date();

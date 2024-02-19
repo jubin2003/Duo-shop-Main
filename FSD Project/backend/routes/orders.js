@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 
+
 // Create an order
 router.post('/', async (req, res) => {
     try {
@@ -36,4 +37,19 @@ router.post('/', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+  router.get('/items/:orderId', async (req, res) => {
+    const { orderId } = req.params;
+  
+    try {
+      // Find items based on the orderId
+      const items = await Order.find({ orderCreationId: orderId });
+  
+      res.json(items);
+    } catch (error) {
+      console.error('Error fetching items:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
+ 
 module.exports = router;
