@@ -15,10 +15,12 @@ router.post('/orders', async (req, res) => {
       key_secret: process.env.RAZORPAY_SECRET,
     });
 
+    const { totalValue } = req.body; // Extract totalValue from the request body
+
     const options = {
-      amount: 50000, // amount in smallest currency unit (change as needed)
+      amount: totalValue * 100, // Convert totalValue to smallest currency unit (assuming totalValue is in currency units)
       currency: 'INR',
-      receipt: 'receipt_order_' + Math.floor(Math.random() * 100000), // unique receipt for each order
+      receipt: 'receipt_order_' + Math.floor(Math.random() * 100000),
     };
 
     const order = await instance.orders.create(options);

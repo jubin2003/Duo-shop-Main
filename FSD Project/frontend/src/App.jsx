@@ -16,6 +16,7 @@ import ViewUsers from '../src/adminfunctionalites/ViewUsers';
 import UpdateProduct from '../src/adminfunctionalites/UpdateProduct';
 import ProfilePage from './pages/ProfilePage';
 import ViewOrders from './adminfunctionalites/ViewOrders';
+import Orders from './pages/Orders';
 const App = () => {
   const user = true ; // Replace this with your actual authentication logic
   return (
@@ -38,6 +39,8 @@ const App = () => {
         <Route path="/cart" element={<Cart />} />
         <Route path="/success" element={<Success />} />
         <Route path="/buynow" element={<BuyNow />} />
+        <Route path="/orders" element={<Orders/>} />
+
         {/* <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} /> */}
         {/* <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} /> */}
         <Route path="/login" element={<Login />} />

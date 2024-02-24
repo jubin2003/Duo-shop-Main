@@ -15,6 +15,9 @@ import {
   LocalOffer,
 } from '@mui/icons-material';
 import { MenuItem as MuiMenuItem } from '@mui/material';
+import Popover from '@mui/material/Popover';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
 const Container = styled.div`
   height: 60px;
   ${mobile({ height: '50px' })}
@@ -102,7 +105,8 @@ const NavBarUser = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Define isLoggedIn state
-  const [isAdmin, setIsAdmin] = useState(false); // Define isAdmin state
+  const [isAdmin, setIsAdmin] = useState(false); 
+  // Define isAdmin state
   useEffect(() => {
     const storedUsername = localStorage.getItem('username');
     const accessToken = localStorage.getItem('accessToken');
@@ -118,7 +122,7 @@ const NavBarUser = () => {
   useEffect(() => {
     const handleBrowserBack = (event) => {
       event.preventDefault();
-      navigate('/');
+      navigate('/userhome');
     };
 
     window.addEventListener('popstate', handleBrowserBack);
@@ -146,10 +150,20 @@ const NavBarUser = () => {
     setIsAdmin(false);
 
     // Navigate to the login page or another appropriate route
-    navigate('/login');
+    navigate('/');
   };
 
   const quantity = useSelector((state) => state.cart.quantity);
+  const [anchorEl, setAnchorEl] = useState(null);
+// Open the popover when clicking on the AccountCircle icon
+const handleAccountClick = (event) => {
+  setAnchorEl(event.currentTarget);
+};
+
+// Close the popover
+const handleClose = () => {
+  setAnchorEl(null);
+};
 
   return (
     <Container>
@@ -166,11 +180,36 @@ const NavBarUser = () => {
       </Center>
       <Right>
         <Text>{username ? `Hello, ${username}!` : 'User Profile'}</Text>
-        <Link to="/profile" style={{ textDecoration: 'none', color: 'white' }}>
-          <IconWrapper>
+       
+          <IconWrapper onClick={handleAccountClick}>
             <AccountCircle style={{ color: 'black', fontSize: 24, cursor: 'pointer' }} />
           </IconWrapper>
-        </Link>
+        <Popover
+          open={Boolean(anchorEl)}
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
+          <List>
+            <ListItem>
+              <Link to="/profile" style={{ textDecoration: 'none', color: 'black' }}>
+                Profile
+              </Link>
+            </ListItem>
+            <ListItem>
+              <Link to="/orders" style={{ textDecoration: 'none', color: 'black' }}>
+                Orders
+              </Link>
+            </ListItem>
+          </List>
+        </Popover>
         <Link to="/cart">
           <StyledMenuItem> {/* Use the renamed styled component */}
             <Badge badgeContent={quantity} color="primary">

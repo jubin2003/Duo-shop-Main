@@ -157,56 +157,56 @@ const Cart = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    const fetchClientSecret = async () => {
-      try {
-        const response = await userRequest.post("/checkout/payment", {
-          tokenId: stripeToken.id,
-          amount: cart.total * 100,
-        });
+  // useEffect(() => {
+  //   const fetchClientSecret = async () => {
+  //     try {
+  //       const response = await userRequest.post("/checkout/payment", {
+  //         tokenId: stripeToken.id,
+  //         amount: cart.total * 100,
+  //       });
 
-        setClientSecret(response.data.clientSecret);
-      } catch (error) {
-        console.error('Error fetching client secret:', error);
-      }
-    };
+  //       setClientSecret(response.data.clientSecret);
+  //     } catch (error) {
+  //       console.error('Error fetching client secret:', error);
+  //     }
+  //   };
 
-    if (stripeToken) {
-      fetchClientSecret();
-    }
-  }, [stripeToken, cart.total]);
+  //   if (stripeToken) {
+  //     fetchClientSecret();
+  //   }
+  // }, [stripeToken, cart.total]);
 
-  const onToken = (token) => {
-    setStripeToken(token);
-  };
+  // const onToken = (token) => {
+  //   setStripeToken(token);
+  // };
   
 
-  const handleCheckout = async () => {
-    try {
-      if (!stripeToken) {
-        // Handle the case where stripeToken is not defined
-        console.error('Stripe token is not defined.');
-        return;
-      }
+  // const handleCheckout = async () => {
+  //   try {
+  //     if (!stripeToken) {
+  //       // Handle the case where stripeToken is not defined
+  //       console.error('Stripe token is not defined.');
+  //       return;
+  //     }
 
-      const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: stripeToken.id,
-      });
+  //     const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
+  //       payment_method: stripeToken.id,
+  //     });
 
-      if (error) {
-        console.error('Payment confirmation error:', error);
-      } else if (paymentIntent.status === 'succeeded') {
-        navigate("/success", {
-          state: {
-            stripeData: paymentIntent,
-            products: cart.products,
-          },
-        });
-      }
-    } catch (error) {
-      console.error('Error confirming card payment:', error);
-    }
-  };
+  //     if (error) {
+  //       console.error('Payment confirmation error:', error);
+  //     } else if (paymentIntent.status === 'succeeded') {
+  //       navigate("/success", {
+  //         state: {
+  //           stripeData: paymentIntent,
+  //           products: cart.products,
+  //         },
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error('Error confirming card payment:', error);
+  //   }
+  // };
   const handleDelete = async (productId) => {
     try {
       // Make a request to your server to delete the product from the cart
@@ -250,7 +250,10 @@ const Cart = () => {
     }
 
     try {
-      const result = await axios.post('http://localhost:5000/api/payment/orders');
+      // Use the totalValue variable directly in the request body
+      const result = await axios.post('http://localhost:5000/api/payment/orders', {
+        totalValue: cart.total,
+      });
 
       if (!result) {
         alert('Server error. Are you online?');
@@ -258,7 +261,6 @@ const Cart = () => {
       }
 
       const { amount, id: order_id, currency } = result.data;
-
       const options = {
         key: 'rzp_test_qSuIgz3hFLcQ68', // Enter the Key ID generated from the Dashboard
         amount: amount.toString(),
@@ -387,7 +389,7 @@ const Cart = () => {
               <SummaryItemText>Total</SummaryItemText>
               <SummaryItemPrice>{cart.total}</SummaryItemPrice>
             </SummaryItem>
-            <StripeCheckout
+            {/* <StripeCheckout
               name="Duo Clothing"
               image="https://www.logotypes101.com/logos/650/4D9F7231ECDCC11B64396DC74395DCC8/duo.png"
               billingAddress
@@ -397,7 +399,7 @@ const Cart = () => {
               token={onToken}
               stripeKey={KEY}
             >
-              </StripeCheckout>
+              </StripeCheckout> */}
               <SummaryButton onClick={displayRazorpay} >CHECKOUT NOW</SummaryButton>
             
           </Summary>

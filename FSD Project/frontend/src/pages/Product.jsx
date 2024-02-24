@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Announcement from '../components/Announcement';
 import Footer from '../components/Footer';
+import NavBarUser from '../components/NavBarUser';
 
 // Styled components
 const Container = styled.div``;
@@ -255,6 +256,7 @@ const Product = () => {
   };
   return (
     <>
+    <NavBarUser/>
     <Announcement/>
       <Container>
         <Wrapper>

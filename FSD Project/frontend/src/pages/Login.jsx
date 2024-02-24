@@ -173,7 +173,7 @@ const Login = () => {
   useEffect(() => {
     const handleBrowserBack = (event) => {
       event.preventDefault();
-      navigate('/login');
+      navigate('/');
     };
 
     window.addEventListener('popstate', handleBrowserBack);
