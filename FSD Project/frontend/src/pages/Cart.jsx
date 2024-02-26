@@ -154,59 +154,48 @@ const Cart = () => {
   const [product, setProduct] = useState(null);
   const [totalValue, setTotalValue] = useState(0);
   const productId = sessionStorage.getItem('productId');
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
 
-  // useEffect(() => {
-  //   const fetchClientSecret = async () => {
-  //     try {
-  //       const response = await userRequest.post("/checkout/payment", {
-  //         tokenId: stripeToken.id,
-  //         amount: cart.total * 100,
-  //       });
 
-  //       setClientSecret(response.data.clientSecret);
-  //     } catch (error) {
-  //       console.error('Error fetching client secret:', error);
-  //     }
-  //   };
-
-  //   if (stripeToken) {
-  //     fetchClientSecret();
-  //   }
-  // }, [stripeToken, cart.total]);
-
-  // const onToken = (token) => {
-  //   setStripeToken(token);
-  // };
+  useEffect(() => {
+    const userId = sessionStorage.getItem('userId');
+    if (userId) {
+      fetchCurrentUser(userId);
+      setUserId(userId);
+    }
+  }, []);
   
+  const fetchCurrentUser = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/fetchuser/details/${userId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch current user details');
+      }
+      const data = await response.json();
+      setCurrentUser(data);
+  
+      // Update state values with user details if available
+      setCustomerName(data.name || ''); // Use the name field from the fetched data
+      setShippingAddress(data.address || ''); // Use the address field from the fetched data
+      setPhoneNumber(data.phoneNumber || ''); // Use the phoneNumber field from the fetched data
+      setLandmark(data.landmark || ''); // Use the landmark field from the fetched data
+      setAlternatePhoneNumber(data.alternatePhoneNumber || ''); // Use the alternatePhoneNumber field from the fetched data
+    } catch (error) {
+      console.error('Error fetching current user details:', error);
+    }
+  };
+  console.log('Placing order...');
+  console.log('userID:', userId);
+  console.log('Product ID:', productId);
+  console.log('Customer Name:', customerName);
+  console.log('Shipping Address:', shippingAddress);
+  console.log('Phone Number:', phoneNumber);
+  console.log('Quantity:', selectedQuantity);
+  console.log('Total Value:', cart.total);
 
-  // const handleCheckout = async () => {
-  //   try {
-  //     if (!stripeToken) {
-  //       // Handle the case where stripeToken is not defined
-  //       console.error('Stripe token is not defined.');
-  //       return;
-  //     }
-
-  //     const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
-  //       payment_method: stripeToken.id,
-  //     });
-
-  //     if (error) {
-  //       console.error('Payment confirmation error:', error);
-  //     } else if (paymentIntent.status === 'succeeded') {
-  //       navigate("/success", {
-  //         state: {
-  //           stripeData: paymentIntent,
-  //           products: cart.products,
-  //         },
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error('Error confirming card payment:', error);
-  //   }
-  // };
   const handleDelete = async (productId) => {
     try {
       // Make a request to your server to delete the product from the cart
@@ -281,7 +270,7 @@ const Cart = () => {
             razorpaySignature: response.razorpay_signature,
             customerDetails: {
               name: customerName || 'Jubin Thomas',
-              email: 'Duo@gmail.com',
+              email: currentUser?.email || 'Duo@gmail.com',
               contact: phoneNumber || '9568124578',
               address: shippingAddress || 'Duo Clothing Store, Kottayam, Kerala, Pincode:686522',
             }
@@ -292,22 +281,29 @@ const Cart = () => {
             sessionStorage.setItem('orderId', orderResponse.data._id);
           window.location.href = `/success?orderId=${orderResponse.data._id}`;
           const result = await axios.post('http://localhost:5000/api/payment/success', data);
-
+          
           alert(result.data.msg);
 
           // Use window.location to navigate to the Success page
           window.location.href = '/success'; 
+           // Clear the cart after successful payment
+      dispatch(clearCart());
+      localStorage.removeItem('cart');
+
+    // Clear cart-related data
+    localStorage.removeItem('cartProducts');
+    localStorage.removeItem('persist:root');
         },
         prefill: {
-        name: customerName || 'Jubin Thomas', // Use the customerName if available, otherwise default to 'Jubin Thomas'
-        email: 'Duo@gmail.com',
-        contact: phoneNumber || '9568124578',
-        address: shippingAddress || 'Duo Clothing Store, Kottayam, Kerala, Pincode:686522',
+          name: customerName || 'Jubin Thomas',
+          email: currentUser?.email || 'Duo@gmail.com',
+          contact: phoneNumber || '9568124578',
+          address: shippingAddress || 'Duo Clothing Store, Kottayam, Kerala, Pincode:686522',
         },
         notes: {
-          customerName: customerName ,
+          customerName: customerName,
           shippingAddress: shippingAddress,
-          phone:phoneNumber,
+          phone: phoneNumber,
           billingAddress: shippingAddress,
         },
         theme: {

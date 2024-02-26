@@ -120,6 +120,19 @@ const Order = require("../models/Order");
             }
         });
          
-            
+        router.get('/list/:userId', async (req, res) => {
+            try {
+              const orders = await Order.find({ userId: req.params.userId }).populate({
+                path: 'productId',
+                model: 'Product',
+              });
+              res.status(200).json(orders);
+            } catch (err) {
+              console.error(err.message);
+              res.status(500).json({ message: 'Server Error' });
+            }
+          });
+          
+          
 
 module.exports = router; 

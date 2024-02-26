@@ -106,4 +106,28 @@ router.put("/user/:id", async (req, res) => {
       res.status(500).json(err);
   }
 });
+router.get('/details/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Assuming user has properties like 'name', 'address', 'pincode', 'landmark', 'phoneNumber'
+    res.json({
+      name: user.name || '',
+      email:user.email||'',
+      address: user.address || '',
+      pincode: user.pincode || '',
+      landmark: user.landmark || '',
+      phoneNumber: user.phoneNumber || '',
+    });
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

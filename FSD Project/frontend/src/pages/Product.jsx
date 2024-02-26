@@ -12,7 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Announcement from '../components/Announcement';
 import Footer from '../components/Footer';
 import NavBarUser from '../components/NavBarUser';
-
+import Swal from 'sweetalert2';
 // Styled components
 const Container = styled.div``;
 const Wrapper = styled.div`
@@ -165,8 +165,15 @@ const Product = () => {
     
     // Check if user is logged in
     if (!userId) {
-      // Redirect to login page or handle authentication logic
-      alert("login first");
+      // Show a custom alert with SweetAlert2 and a delay
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Login first',
+        showConfirmButton: false,
+        timer: 4000, // Adjust delay in milliseconds
+      });
+  
+      // Redirect to login page
       window.location.href = '/login';
       return;
     }

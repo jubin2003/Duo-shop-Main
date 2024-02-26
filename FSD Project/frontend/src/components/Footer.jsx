@@ -8,12 +8,13 @@ import EmailIcon from '@mui/icons-material/Email';
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
 import BusinessIcon from '@mui/icons-material/Business';
 import { mobile } from "../Responsive";
+import { Link } from 'react-router-dom';
 
 const Container = styled.div`
   display: flex;
   background-color: teal;
   color: black;
- 
+
   ${mobile({ flexDirection: "column" })}
 `;
 
@@ -30,7 +31,7 @@ const Logo = styled.h1`
 
 const Desc = styled.p`
   margin-bottom: 20px;
-  font-weight:bold;
+  font-weight: bold;
 `;
 
 const SocialContainer = styled.div`
@@ -57,7 +58,7 @@ const Center = styled.div`
 
 const Title = styled.h3`
   margin-bottom: 30px;
-  font-weight:bold;
+  font-weight: bold;
 `;
 
 const List = styled.ul`
@@ -68,7 +69,14 @@ const List = styled.ul`
 
 const ListItem = styled.li`
   margin-bottom: 10px;
-  font-weight:bold;
+  font-weight: bold;
+  color: black; /* Set the text color to black */
+  text-decoration: none; /* Remove underlining */
+  cursor: pointer; /* Add pointer cursor on hover */
+
+  &:hover {
+    text-decoration: underline; /* Underline on hover */
+  }
 `;
 
 const Right = styled.div`
@@ -80,7 +88,7 @@ const ContactItem = styled.div`
   margin-bottom: 20px;
   display: flex;
   align-items: center;
-  font-weight:bold;
+  font-weight: bold;
 `;
 
 const Payment = styled.img`
@@ -94,20 +102,19 @@ const Footer = () => {
       <Left>
         <Logo>Duo</Logo>
         <Desc>
-        Experience Fashion for Every Moment: Elevate your style with our curated duo clothing collection, blending comfort, elegance, and uniqueness. Discover versatile pieces crafted with quality, designed to empower your confidence. Explore the intersection of fashion and comfort in every stitch
+          Experience Fashion for Every Moment: Elevate your style with our curated duo clothing collection, blending comfort, elegance, and uniqueness. Discover versatile pieces crafted with quality, designed to empower your confidence. Explore the intersection of fashion and comfort in every stitch
         </Desc>
         <SocialContainer>
-        <SocialIcon color="#3B5999"><FacebookOutlinedIcon /></SocialIcon>
-        <SocialIcon color="#E4405F"><InstagramIcon /></SocialIcon>
-        <SocialIcon color="#25D366"><WhatsAppIcon /></SocialIcon>
-         <SocialIcon color="#1DA1F2"><TwitterIcon /></SocialIcon>
-
+          <SocialIcon color="#3B5999"><FacebookOutlinedIcon /></SocialIcon>
+          <SocialIcon color="#E4405F"><InstagramIcon /></SocialIcon>
+          <SocialIcon color="#25D366"><WhatsAppIcon /></SocialIcon>
+          <SocialIcon color="#1DA1F2"><TwitterIcon /></SocialIcon>
         </SocialContainer>
       </Left>
       <Center>
         <Title>Useful Links</Title>
         <List>
-          <ListItem>Home</ListItem>
+          <ListItem><Link to="/userhome">Home</Link></ListItem>
           <ListItem>Cart</ListItem>
           <ListItem>Mens Fashion</ListItem>
           <ListItem>Womens Fashion</ListItem>

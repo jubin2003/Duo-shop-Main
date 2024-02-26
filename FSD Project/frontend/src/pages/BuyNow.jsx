@@ -197,6 +197,12 @@ const BuyNow = () => {
               contact: phoneNumber || '9568124578',
               address: shippingAddress || 'Duo Clothing Store, Kottayam, Kerala, Pincode:686522',
             },
+            product: {
+              title: product.title,
+              desc: product.desc,
+              price: product.price,
+              image:product.img,
+            },
           };
           console.log(data);
           const orderResponse = await axios.post('http://localhost:5000/api/order', data);
