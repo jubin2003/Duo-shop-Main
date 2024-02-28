@@ -131,7 +131,7 @@ const Success = () => {
     <Wrapper1>
       <Wrapper2>
         <H1>Thank you for Shopping With Us !</H1>
-        <Wrapper2P>Expected Delivery of your Product will be on Feb 22 2024</Wrapper2P>
+        <Wrapper2P>Expected Delivery of your Product will be on March 22 2024</Wrapper2P>
         <GoHomeButton onClick={redirectToUserHome}>Go home</GoHomeButton>   
       </Wrapper2>
       <FooterLike>

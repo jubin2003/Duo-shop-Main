@@ -64,31 +64,19 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json(err);
   }
 });
-router.delete("/:productId", async (req, res) => {
+
+// DELETE: Remove product from cart
+router.delete('/:productId', async (req, res) => {
   try {
-    const productId = req.params.productId;
+    const { productId } = req.params;
 
-    // Convert productId to ObjectId
-    const productIdObjectId = new ObjectId(productId);
+    // Implement logic to remove the product from the cart in your database
+    await Cart.findOneAndRemove({ productId });
 
-    // Find the cart item by the provided productId and remove it
-    const updatedCart = await Cart.findOneAndUpdate(
-      { "products.productId": productIdObjectId },
-      { $pull: { products: { productId: productIdObjectId } } },
-      { new: true }
-    );
-
-    if (!updatedCart) {
-      // If the cart is not found or product is not in the cart, return an error response
-      return res.status(404).json({ error: 'Cart or product not found' });
-    }
-
-    // Return the updated cart
-    res.status(200).json({ cartItems: updatedCart.products });
+    res.status(200).json({ message: 'Product removed from the cart successfully' });
   } catch (error) {
-    // Handle errors, e.g., database connection issues
-    console.error('Error deleting product from cart:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Error removing product from cart:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 router.get("/find/:userId", async (req, res) => {

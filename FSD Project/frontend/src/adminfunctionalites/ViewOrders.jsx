@@ -66,9 +66,13 @@ const OrderStatus = styled.span`
   text-transform: capitalize;
   font-weight: bold;
 `;
-
+const OrdersTitle = styled.h2`
+  font-size: 24px;
+  color: #343a40;
+`;
 const OrderDetail = styled.p`
   margin: 10px 0;
+  font-size: 16px;
 `;
 
 const StatusDropdown = styled.select`
@@ -138,6 +142,18 @@ const ConfirmationButton = styled.button`
     background-color: ${(props) => (props.primary ? '#0056b3' : '#495057')};
   }
 `;
+const ProductImage = styled.img`
+  width: 100px;
+  height: 100px;
+  margin-right: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+`;
+const OrderAddress = styled.h2`
+font-size: 24px;
+color: #343a40;
+`;
+
 const ViewOrders = () => {
     const [orders, setOrders] = useState([]);
     const [confirmationVisible, setConfirmationVisible] = useState(false);
@@ -204,6 +220,7 @@ const ViewOrders = () => {
     <Container>
    
       <Title>Manage Orders</Title>
+      
       <OrderList>
         {orders.map((order) => (
           <OrderItem key={order._id}>
@@ -211,7 +228,17 @@ const ViewOrders = () => {
               <OrderTitle>Order ID: {order._id}</OrderTitle>
               <OrderStatus status={order.status}>{order.status}</OrderStatus>
             </OrderHeader>
-         
+           <OrdersTitle>Product Details:</OrdersTitle>
+              <ul>
+                {order.productId.map((product) => (
+                  <li key={product._id}>
+                    <p>Product Name: {product.title}</p>
+                    <ProductImage src={product.img} alt={product.title} />
+                    {/* <p>Price: {product.price}</p> */}
+                  </li>
+                ))}
+              </ul>
+              <OrderAddress>Order Placed Address:</OrderAddress>
 <OrderDetail>Customer Name: {order.customerDetails && order.customerDetails.name}</OrderDetail>
 <OrderDetail>Email: {order.customerDetails && order.customerDetails.email}</OrderDetail>
 <OrderDetail>Phone Number: {order.customerDetails && order.customerDetails.contact}</OrderDetail>

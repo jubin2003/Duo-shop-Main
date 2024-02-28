@@ -34,42 +34,29 @@ function ResponsiveAppBar() {
   };
 
   const handleLogout = () => {
-    // Use setIsLoggedIn and setIsAdmin to update state
-    setIsLoggedIn(false);
-    setIsAdmin(false);
-
-    // Rest of the logout logic
     document.cookie = 'accessToken=; Secure; HttpOnly; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
     localStorage.removeItem('accessToken');
-    localStorage.removeItem('isAdmin');
+    localStorage.removeItem('isAdmin'); // Remove admin status when logging out
+    setIsLoggedIn(false);
+    setIsAdmin(false);
     navigate('/login');
   };
+  
 
   React.useEffect(() => {
-    const handleBrowserBack = (event) => {
-      event.preventDefault();
+    const handleNavigation = () => {
       if (!isLoggedIn) {
         navigate('/login');
       }
     };
-
-    const handleBrowserForward = (event) => {
-      event.preventDefault();
-      if (!isLoggedIn) {
-        navigate('/login');
-      }
-    };
-
-    if (!isLoggedIn) {
-      window.addEventListener('popstate', handleBrowserBack);
-      window.addEventListener('popstate', handleBrowserForward);
-    }
-
+  
+    window.addEventListener('popstate', handleNavigation);
+  
     return () => {
-      window.removeEventListener('popstate', handleBrowserBack);
-      window.removeEventListener('popstate', handleBrowserForward);
+      window.removeEventListener('popstate', handleNavigation);
     };
   }, [isLoggedIn, navigate]);
+  
 
   return (
     <AppBar position="static">

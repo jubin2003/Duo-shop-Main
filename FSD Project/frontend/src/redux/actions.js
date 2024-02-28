@@ -1,5 +1,5 @@
 // actions.js
-import { publicRequest } from '../requestMethod'; // Import your axios instance for public requests
+import { createAsyncThunk } from '@reduxjs/toolkit';
 
 // Define action types
 export const ADD_TO_CART = 'ADD_TO_CART';
@@ -7,7 +7,7 @@ export const REMOVE_FROM_CART = 'REMOVE_FROM_CART';
 export const CLEAR_CART = 'CLEAR_CART';
 export const FETCH_CART_SUCCESS = 'FETCH_CART_SUCCESS';
 export const FETCH_CART_FAILURE = 'FETCH_CART_FAILURE';
-
+export const REMOVE_CART_ITEM = 'cart/removeCartItem';
 // Define action creators
 export const addToCart = (product) => ({
   type: ADD_TO_CART,
@@ -17,11 +17,6 @@ export const addToCart = (product) => ({
 export const removeFromCart = (productId) => ({
   type: REMOVE_FROM_CART,
   payload: productId,
-});
-// actions.js
-export const removeProduct = (productId) => ({
-  type: 'REMOVE_PRODUCT',
-  payload: { productId },
 });
 
 export const clearCart = () => ({
@@ -38,4 +33,16 @@ export const fetchCart = (userId) => async (dispatch) => {
   }
 };
 
-// You can add more action types and creators as needed
+// Additional action creators can be added here as needed
+// Action creators
+export const removeCartItem = createAsyncThunk(
+    REMOVE_CART_ITEM,
+    async (productId, thunkAPI) => {
+      try {
+        await axios.delete(`/cart/${productId}`);
+        return productId; // Return the productId for removal from state
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    }
+  );

@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography';
 const MediaCard = () => {
   const [userCount, setUserCount] = useState(0);
   const [productCount, setProductCount] = useState(0);
-
+  const [orderCount, setOrderCount] = useState(0);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -25,11 +25,18 @@ const MediaCard = () => {
 
         // Fetch total products
         const productResponse = await axios.get('http://localhost:5000/api/fetchproduct/stats');
-
         if (productResponse.status === 200) {
           setProductCount(productResponse.data.total || 0);
         } else {
           console.error('Error fetching product count:', productResponse.statusText);
+        }
+
+        // Fetch total orders
+        const orderResponse = await axios.get('http://localhost:5000/api/orderdata/count');
+        if (orderResponse.status === 200) {
+          setOrderCount(orderResponse.data.count || 0);
+        } else {
+          console.error('Error fetching order count:', orderResponse.statusText);
         }
       } catch (error) {
         console.error('Error during data fetching:', error.message);
@@ -95,7 +102,7 @@ const MediaCard = () => {
           />
           <CardContent>
             <Typography gutterBottom variant="h5" component="div">
-              Order {productCount}
+              Order  {orderCount}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Number of Orders

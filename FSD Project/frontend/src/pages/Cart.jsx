@@ -13,6 +13,8 @@ import StripeCheckout from 'react-stripe-checkout';
 import { userRequest } from '../requestMethod';
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
+import { removeCartItem } from '../redux/actions';
+import Swal from 'sweetalert2';
 const KEY = 'pk_test_51OVyM9SBqq3RJksXlACJz3v239mH9KKpBId9wuddMXdCrB6RJtuKhah0gHhGqSIpircX6B3utSeo7CxCuUpN0DX3002nPmLoER';
 
 const Container = styled.div``;
@@ -138,6 +140,7 @@ const SummaryButton = styled.button`
 `;
 
 const Cart = () => {
+  
   const cart = useSelector((state) => state.cart);
   const [stripeToken, setStripeToken] = useState(null);
   const [clientSecret, setClientSecret] = useState('');
@@ -196,22 +199,31 @@ const Cart = () => {
   console.log('Quantity:', selectedQuantity);
   console.log('Total Value:', cart.total);
 
-  const handleDelete = async (productId) => {
-    try {
-      // Make a request to your server to delete the product from the cart
-      const response = await userRequest.delete(`/cart/${productId}`);
-
-      // Assuming the server responds with a success message
-      console.log('Product deleted from cart:', response.data);
-
-      // Dispatch deleteProduct action if needed
-      // dispatch(deleteProduct(productId));
-
-      // Fetch the updated cart after deleting a product
-      dispatch(fetchCart(userId));
-    } catch (error) {
-      console.error('Error deleting product from cart:', error);
-    }
+  const handleDelete = (productId) => {
+    dispatch(removeCartItem(productId))
+      .then((removedProductId) => {
+        // Handle success case
+        Swal.fire({
+          icon: 'success',
+          title: 'Product Removed',
+          text: 'The product has been successfully removed from your cart.',
+        });
+  
+        // If the removed product is the one currently being ordered, clear the session storage
+        const orderedProductId = sessionStorage.getItem('productId');
+        if (orderedProductId === productId) {
+          sessionStorage.removeItem('productId');
+        }
+      })
+      .catch((error) => {
+        // Handle error case
+        console.error('Error removing product from cart:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An error occurred while removing the product from your cart. Please try again.',
+        });
+      });
   };
   // Razorpay
   const loadScript = async (src) => {
@@ -230,40 +242,41 @@ const Cart = () => {
   };
 
   const displayRazorpay = async () => {
-
+    // Load Razorpay script
     const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js');
-
+  
     if (!res) {
       alert('Razorpay SDK failed to load. Are you online?');
       return;
     }
-
+  
     try {
-      // Use the totalValue variable directly in the request body
+      // Get order details from server
       const result = await axios.post('http://localhost:5000/api/payment/orders', {
         totalValue: cart.total,
       });
-
+  
       if (!result) {
         alert('Server error. Are you online?');
         return;
       }
-
+  
       const { amount, id: order_id, currency } = result.data;
+  
+      // Prepare options for Razorpay
       const options = {
         key: 'rzp_test_qSuIgz3hFLcQ68', // Enter the Key ID generated from the Dashboard
         amount: amount.toString(),
         currency: currency,
         name: 'Duo Clothing',
         description: 'Test Transaction',
-        image:"https://www.logotypes101.com/logos/650/4D9F7231ECDCC11B64396DC74395DCC8/duo.png" ,
-    
+        image: "https://www.logotypes101.com/logos/650/4D9F7231ECDCC11B64396DC74395DCC8/duo.png",
         order_id: order_id,
         handler: async function (response) {
           const data = {
             userId: userId,
-            productId: productId, // Assuming product has a valid _id
-            quantity: 1,
+            productId: cart.products.map(product => product._id), // Assuming product has a valid _id
+            quantity: cart.products.map(product => product.quantity),
             orderCreationId: order_id,
             razorpayPaymentId: response.razorpay_payment_id,
             razorpayOrderId: response.razorpay_order_id,
@@ -276,23 +289,35 @@ const Cart = () => {
             }
           };
           console.log(data);
-          const orderResponse = await axios.post('http://localhost:5000/api/order', data);
-          console.log('Order details stored in the database:', orderResponse.data);
-            sessionStorage.setItem('orderId', orderResponse.data._id);
-          window.location.href = `/success?orderId=${orderResponse.data._id}`;
-          const result = await axios.post('http://localhost:5000/api/payment/success', data);
           
-          alert(result.data.msg);
+          try {
+            // Store order details in the database
+            const orderResponse = await axios.post('http://localhost:5000/api/orderdata', data);
+            console.log('Order details stored in the database:', orderResponse.data);
+            sessionStorage.setItem('orderId', orderResponse.data._id);
+            
+            // Redirect to success page after successful payment
+            window.location.href = `/success?orderId=${orderResponse.data._id}`;
+            dispatch(clearCart());
+            localStorage.removeItem('cart');
+            localStorage.removeItem('cartProducts');
+            localStorage.removeItem('persist:root');
+            // Notify user of successful payment
+            const paymentResult = await axios.post('http://localhost:5000/api/payment/success', data);
+            alert(paymentResult.data.msg);
+            
+            // Clear the cart after successful payment
+            alert('Payment successful');
 
-          // Use window.location to navigate to the Success page
-          window.location.href = '/success'; 
-           // Clear the cart after successful payment
-      dispatch(clearCart());
-      localStorage.removeItem('cart');
-
-    // Clear cart-related data
-    localStorage.removeItem('cartProducts');
-    localStorage.removeItem('persist:root');
+          // Clear the cart after successful payment
+          dispatch(clearCart());
+          localStorage.removeItem('cart');
+          localStorage.removeItem('cartProducts');
+          localStorage.removeItem('persist:root');
+          } catch (error) {
+            console.error('Error storing order details or processing payment:', error);
+            alert('An error occurred during checkout. Please try again.');
+          }
         },
         prefill: {
           name: customerName || 'Jubin Thomas',
@@ -310,13 +335,15 @@ const Cart = () => {
           color: '#0593ba',
         },
       };
-
+  
+      // Create Razorpay payment object and open checkout
       const paymentObject = new window.Razorpay(options);
       paymentObject.open();
     } catch (error) {
       console.error('Error during Razorpay payment:', error);
     }
   };
+  
   return (
     <Container>
       {/* <Navbar /> */}

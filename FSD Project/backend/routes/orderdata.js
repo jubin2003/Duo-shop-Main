@@ -3,15 +3,32 @@ const Order = require("../models/Order");
 
 
 
-    router.post("/",async(req,res)=>{
-    const newOrder = new Order(req.body)
-    try{
-    const savedOrder = await newOrder.save();
-    res.status(200).json(savedOrder);
-    }catch(err){
-        res.status(500).json(err);
+router.post("/", async (req, res) => {
+    try {
+        // Ensure req.body contains all necessary fields for an Order
+        const { userId, productId, quantity, orderCreationId, razorpayPaymentId, razorpayOrderId, razorpaySignature, customerDetails } = req.body;
+        
+        // Create a new Order instance with validated data
+        const newOrder = new Order({
+            userId,
+            productId,
+            quantity,
+            orderCreationId,
+            razorpayPaymentId,
+            razorpayOrderId,
+            razorpaySignature,
+            customerDetails
+        });
+        
+        // Save the new order to the database
+        const savedOrder = await newOrder.save();
+        
+        res.status(201).json(savedOrder); // 201 status for "Created" resource
+    } catch (err) {
+        console.error("Error creating order:", err);
+        res.status(500).json({ error: "Failed to create order" });
     }
-    });
+});
 
     //update
     router.put("/:id", async (req, res) => {
@@ -55,16 +72,19 @@ const Order = require("../models/Order");
 
         //get all 
 
-        router.get("/",async(req,res)=>{
-            try{
-           const orders = await Order.find();
-           res.status(200).json(orders);
+       router.get("/", async (req, res) => {
+    try {
+        const orders = await Order.find().populate({
+            path: 'productId',
+            model: 'Product', // Assuming your product model is named 'Product'
+        });
+        res.status(200).json(orders);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
 
-            }catch(err){
-                res.status(500).json(err);
-
-            }
-        }); 
         router.put('/order/:orderId', async (req, res) => {
             const { orderId } = req.params;
             const { status } = req.body;
@@ -124,7 +144,7 @@ const Order = require("../models/Order");
             try {
               const orders = await Order.find({ userId: req.params.userId }).populate({
                 path: 'productId',
-                model: 'Product',
+                model: 'Product', // Assuming your product model is named 'Product'
               });
               res.status(200).json(orders);
             } catch (err) {
@@ -132,6 +152,16 @@ const Order = require("../models/Order");
               res.status(500).json({ message: 'Server Error' });
             }
           });
+          // GET total number of orders
+router.get("/count", async (req, res) => {
+    try {
+        const orderCount = await Order.countDocuments();
+        res.status(200).json({ count: orderCount });
+    } catch (err) {
+        console.error("Error fetching order count:", err);
+        res.status(500).json({ error: "Failed to fetch order count" });
+    }
+});
           
           
 

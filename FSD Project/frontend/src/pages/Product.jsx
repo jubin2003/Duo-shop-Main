@@ -118,15 +118,34 @@ const fetchCart = async (userId) => {
   }
 };
 
+// // Product component
+// const fetchCart = async (userId) => {
+//   try {
+//     const response = await fetch(`http://localhost:5000/api/cart/find/${userId}`);
+//     const data = await response.json();
+
+//     if (response.ok) {
+//       console.log('Updated cart data:', data);
+//       // You can update the state or perform other actions based on the fetched cart data
+//     } else {
+//       console.error('Error fetching cart data:', data);
+//     }
+//   } catch (error) {
+//     console.error('Error fetching cart data:', error);
+//   }
+// };
+
 // Product component
 const Product = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [product, setProduct] = useState({});
   const [quantity, setQuantity] = useState(1);
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [color, setColor] = useState('');
   const [size, setSize] = useState('');
   const dispatch = useDispatch();
+  
   useEffect(() => {
     const getProduct = async () => {
       try {
@@ -138,15 +157,16 @@ const Product = () => {
     };
     getProduct();
   }, [id]);
-  
 
   const userId = sessionStorage.getItem('userId');
 
   const handleQuantity = (type) => {
     if (type === 'dec') {
       setQuantity(quantity > 1 ? quantity - 1 : 1);
+      setSelectedQuantity(selectedQuantity > 1 ? selectedQuantity - 1 : 1);
     } else {
       setQuantity(quantity + 1);
+      setSelectedQuantity(selectedQuantity + 1);
     }
   };
 
@@ -162,7 +182,7 @@ const Product = () => {
     const productId = product._id;
     sessionStorage.setItem('productId', productId);
     const userId = sessionStorage.getItem('userId');
-    
+  
     // Check if user is logged in
     if (!userId) {
       // Show a custom alert with SweetAlert2 and a delay
@@ -177,48 +197,55 @@ const Product = () => {
       window.location.href = '/login';
       return;
     }
-    try {
-      const userId = sessionStorage.getItem('userId');
-      const productId = sessionStorage.getItem('productId');
-      const quantity = 1;
   
-      // Check if userId and productId are present
-      if (!userId || !productId) {
-        toast.warning('Invalid user or product information.', {
-          autoClose: 3000,
-          className: 'custom-toast',
-        });
-        return;
-      }
-      
-      // Make a POST request to the backend to add the product to the cart
-      const response = await fetch('http://localhost:5000/api/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-          product: { productId, quantity },
-        }),
+    try {
+      const storedProducts = JSON.parse(localStorage.getItem('cartProducts')) || [];
+      const existingProduct = storedProducts.find((p) => p.productId === productId);
+  
+      // Construct the product object with selected options
+      const newProduct = {
+        productId,
+        quantity: selectedQuantity,
+        color,
+        size,
+      };
+  
+      // Send the product data to the backend to add to the cart
+      await axios.post('http://localhost:5000/api/cart/add', {
+        userId,
+        product: newProduct,
       });
   
-      // Check for fetch errors
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast.error(`Error adding product to cart: ${errorData.error}`, {
-          autoClose: 3000,
-          className: 'custom-toast',
-        });
-        return;
+      if (existingProduct) {
+        // Product already in cart, update the quantity
+        existingProduct.quantity += selectedQuantity;
+        localStorage.setItem('cartProducts', JSON.stringify(storedProducts));
+  
+        // Update the product quantity in the cart redux state
+        dispatch(updateProductQuantity({ productId, quantity: existingProduct.quantity }));
+      } else {
+        // Product not in cart, add the product
+        storedProducts.push(newProduct);
+        localStorage.setItem('cartProducts', JSON.stringify(storedProducts));
+  
+        // Add the product to the cart redux state
+        dispatch(addProduct({ ...product, ...newProduct }));
       }
-      alert("product added to cart succesfully");
-      // If the response is successful, display a success message
-      console.log('Product added to cart successfully.');
-      dispatch(addProduct({ ...product, quantity, color, size }));
+  
+      // Update the database with the selected quantity
+      await axios.put(`http://localhost:5000/api/cart/update/${userId}`, {
+        productId,
+        quantity: selectedQuantity,
+      });
+  
+      // Fetch and update the cart data
       fetchCart(userId);
-      // You may choose to fetch the updated cart information here if needed
-      // fetchCart(userId);
+  
+      // Show a success toast
+      toast.success('Product added to cart', {
+        autoClose: 3000,
+        className: 'custom-toast',
+      });
     } catch (error) {
       // Handle unexpected errors
       console.error('Error adding product to cart:', error);
@@ -228,7 +255,7 @@ const Product = () => {
       });
     }
   };
-
+  
   const handleBuynow = () => {
     // Check if the user is logged in
     const productId = product._id;

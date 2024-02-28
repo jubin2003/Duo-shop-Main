@@ -10,7 +10,7 @@ const OrderContainer = styled.div`
   width: 100%;
   padding: 20px;
   background-color: cream; /* Dark blue background color */
-  color: #161515;
+  color: teal;
 `;
 
 const fadeIn = keyframes`
@@ -45,6 +45,41 @@ const OrderItem = styled.div`
   }
 `;
 
+// const ProductImage = styled.img`
+//   width: 100px;
+//   height: 100px;
+//   margin-right: 20px;
+//   border-radius: 10px;
+//   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+// `;
+
+// const ProductDetails = styled.div`
+//   flex: 1;
+// `;
+
+// const ProductName = styled.h3`
+//   margin: 0;
+//   font-size: 1.2rem;
+//   color: #fff;
+// `;
+
+// const ProductPrice = styled.p`
+//   margin: 5px 0;
+//   color: #ddd;
+// `;
+
+// const DeliveryStatus = styled.p`
+//   font-weight: bold;
+//   color: ${(props) => (props.delivered ? '#4CAF50' : '#F44336')};
+// `;
+const ProductCard = styled.div`
+  display: flex;
+  background-color: #1f1f1f;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
+`;
+
 const ProductImage = styled.img`
   width: 100px;
   height: 100px;
@@ -72,9 +107,8 @@ const DeliveryStatus = styled.p`
   font-weight: bold;
   color: ${(props) => (props.delivered ? '#4CAF50' : '#F44336')};
 `;
-
 const CancelButton = styled.button`
-  background-color: #f44336; /* Red */
+  background-color: teal; /* Red */
   color: #fff;
   border: none;
   padding: 10px 20px;
@@ -176,15 +210,18 @@ const OrderedPage = () => {
         orders.map((order) => (
           // Inside the map function of your OrderedPage component
 <OrderItem key={order._id}>
-  <ProductImage src={order.productId.img} alt={order.productId.title} />
-  <ProductDetails>
-    <ProductName>{order.productId.title}</ProductName>
-    {/* Add any other necessary details like brandName, etc. */}
-    <ProductPrice>Price: ₹{order.productId.price * order.quantity}</ProductPrice>
-    <DeliveryStatus delivered={order.status === 'Delivered'}>
-      Delivery Status: {order.status}
-    </DeliveryStatus>
-  </ProductDetails>
+  {order.productId.map((product, index) => (
+    <ProductCard key={index}>
+      <ProductImage src={product.img} alt={product.title} />
+      <ProductDetails>
+        <ProductName>{product.title}</ProductName>
+        <ProductPrice>Price: ₹{product.price * order.quantity[index]}</ProductPrice>
+        <DeliveryStatus delivered={order.status === 'Delivered'}>
+          Delivery Status: {order.status}
+        </DeliveryStatus>
+      </ProductDetails>
+    </ProductCard>
+  ))}
   
   <CustomerDetails>
     <CustomerName>{order.customerDetails.name}</CustomerName>

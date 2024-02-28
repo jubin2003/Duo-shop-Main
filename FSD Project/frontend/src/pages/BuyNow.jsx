@@ -239,6 +239,8 @@ const BuyNow = () => {
   };
 
   return (
+    <>
+   
     <StyledContainer container justifyContent="center">
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
@@ -346,6 +348,8 @@ const BuyNow = () => {
         </Grid>
       </Grid>
     </StyledContainer>
+    
+    </>
   );
 };
 

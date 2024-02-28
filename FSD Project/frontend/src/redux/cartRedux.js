@@ -1,7 +1,5 @@
-// cartredux.js
-
 import { createSlice } from "@reduxjs/toolkit";
-import { FETCH_CART_SUCCESS, FETCH_CART_FAILURE } from './action'; // Correct the import path
+import { FETCH_CART_SUCCESS, FETCH_CART_FAILURE } from './actions';
 
 // Function to calculate total quantity
 const calculateQuantity = (products) => {
@@ -26,6 +24,12 @@ const cartSlice = createSlice({
       state.products.push(action.payload);
       state.total += action.payload.price * action.payload.quantity;
     },
+    removeProduct: (state, action) => {
+      const productIdToRemove = action.payload.productId;
+      state.products = state.products.filter(product => product._id !== productIdToRemove);
+      state.quantity = calculateQuantity(state.products);
+      state.total = calculateTotal(state.products);
+    },
     clearCart: (state) => {
       state.products = [];
       state.quantity = 0;
@@ -45,5 +49,5 @@ const cartSlice = createSlice({
   },
 });
 
-export const { addProduct, clearCart } = cartSlice.actions;
+export const { addProduct, removeProduct, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;
