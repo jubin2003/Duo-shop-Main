@@ -211,7 +211,7 @@ const Login = () => {
           <Button type="button" onClick={handleLogin}>
             LOGIN
           </Button>
-          <LinkText>Forgot Password</LinkText>
+          
           <LinkText href="/register">Create a new Account</LinkText>
         </Form>
       </Wrapper>
